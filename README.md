@@ -57,7 +57,7 @@ Pipeline includes:
 
 - Smoke tests
 - Regression tests
-- Allure report generation
+- Allure report generation >> https://amineabdelkebir.github.io/api-tests-petstore/
 - Hosted report via GitHub Pages
 
 ## Test Strategy
