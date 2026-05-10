@@ -6,6 +6,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
 
   # =========================
@@ -64,7 +67,7 @@ jobs:
 
 
   # =========================
-  # GENERATE ALLURE REPORT
+  # ALLURE REPORT
   # =========================
   allure-report:
     name: Generate Allure Report
@@ -93,7 +96,7 @@ jobs:
           cp -r allure-smoke/* target/allure-results/ || true
           cp -r allure-regression/* target/allure-results/ || true
 
-      - name: Generate Allure Report (Maven)
+      - name: Generate Allure Report
         run: mvn io.qameta.allure:allure-maven:report
 
       - name: Upload Allure Report
@@ -101,25 +104,3 @@ jobs:
         with:
           name: allure-report
           path: target/site/allure-maven-plugin
-
-
-  # =========================
-  # DEPLOY TO GITHUB PAGES
-  # =========================
-  deploy-report:
-    name: Deploy Allure Report
-    runs-on: ubuntu-latest
-    needs: allure-report
-
-    steps:
-      - name: Download Allure Report
-        uses: actions/download-artifact@v4
-        with:
-          name: allure-report
-          path: report
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: report
