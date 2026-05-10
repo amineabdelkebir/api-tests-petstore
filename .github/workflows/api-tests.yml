@@ -28,7 +28,7 @@ jobs:
       - name: Run Smoke Tests
         run: mvn clean test -DsuiteXmlFile=src/test/resources/testng-smoke.xml
 
-      - name: Upload Smoke Allure Results
+      - name: Upload Smoke Results
         uses: actions/upload-artifact@v4
         with:
           name: allure-results-smoke
@@ -56,7 +56,7 @@ jobs:
       - name: Run Regression Tests
         run: mvn clean test -DsuiteXmlFile=src/test/resources/testng-regression.xml
 
-      - name: Upload Regression Allure Results
+      - name: Upload Regression Results
         uses: actions/upload-artifact@v4
         with:
           name: allure-results-regression
@@ -64,7 +64,7 @@ jobs:
 
 
   # =========================
-  # ALLURE REPORT
+  # ALLURE REPORT (FIXED)
   # =========================
   allure-report:
     name: Generate Allure Report
@@ -84,14 +84,14 @@ jobs:
           name: allure-results-regression
           path: allure-results-regression
 
-      - name: Merge Allure Results
+      - name: Merge Results
         run: |
           mkdir -p target/allure-results
           cp -r allure-results-smoke/* target/allure-results/ || true
           cp -r allure-results-regression/* target/allure-results/ || true
 
-      - name: Generate Allure Report (Maven)
-        run: mvn allure:report
+      - name: Generate Allure Report (Maven plugin FIXED)
+        run: mvn clean test -DskipTests io.qameta.allure:allure-maven:report
 
       - name: Upload Allure Report
         uses: actions/upload-artifact@v4
