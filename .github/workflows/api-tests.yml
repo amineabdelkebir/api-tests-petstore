@@ -12,7 +12,7 @@ permissions:
 
 jobs:
 
-  test-and-report:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,34 +25,50 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      # Run ALL tests (simpler for interview)
-      - name: Run Tests
+      # Run SMOKE
+      - name: Run Smoke Tests
+        run: mvn clean test -DsuiteXmlFile=src/test/resources/testng-smoke.xml
+
+      - name: Save Smoke Results
+        run: |
+          mkdir smoke-results
+          cp -r target/allure-results/. smoke-results/
+
+      # Run REGRESSION
+      - name: Run Regression Tests
         run: mvn clean test -DsuiteXmlFile=src/test/resources/testng-regression.xml
 
-      # Generate Allure report
+      - name: Save Regression Results
+        run: |
+          mkdir regression-results
+          cp -r target/allure-results/. regression-results/
+
+      # Merge results
+      - name: Merge Results
+        run: |
+          mkdir -p target/allure-results
+          cp -r smoke-results/. target/allure-results/ || true
+          cp -r regression-results/. target/allure-results/ || true
+
+      # Generate report
       - name: Generate Allure Report
         run: mvn io.qameta.allure:allure-maven:report
 
-      # Prepare Pages artifact
+      # Prepare GitHub Pages
       - name: Prepare Pages
         run: |
           mkdir public
           cp -r target/site/allure-maven-plugin/* public/
 
-      # Upload to GitHub Pages
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: public
 
   deploy:
-    needs: test-and-report
+    needs: test
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - name: Deploy
         uses: actions/deploy-pages@v4
